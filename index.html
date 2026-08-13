@@ -228,22 +228,32 @@
     </script>
 
 
-    <a href="https://www.janis-bedeicis.id.lv/cenas/" style="
-    position: fixed;
-    bottom: 16px;
-    left: 20px;
-    transform: translateX(-50%);
-    padding: 10px 22px;
-    background: #000;
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    text-decoration: none;
-    z-index: 100;
-">Cenrādis</a>
+    <style>
+.price-button {
+  position: fixed;
+  left: max(10px, env(safe-area-inset-left));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  padding: 10px 18px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 999px;
+  z-index: 99999;
+  white-space: nowrap;
+}
+
+.price-button:hover {
+  opacity: 0.85;
+}
+</style>
+
+<a class="price-button" href="https://www.janis-bedeicis.id.lv/cenas/">
+  Cenrādis
+</a>
 
 <style>
 .seo-badge {
