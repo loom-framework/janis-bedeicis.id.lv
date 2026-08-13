@@ -1,40 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="lv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Jānis Bedeicis</title>
+    <meta name="description" content="Mārketinga Projektu Plānotājs" />
+    <meta name="author" content="Jānis Bedeicis" />
+    <meta name="keywords" content="Jānis Bedeicis" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="Jānis Bedeicis" />
+    <meta property="og:description" content="Mārketinga Projektu Plānotājs" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.janis-bedeicis.id.lv" />
+    <meta property="og:image" content="images/placeholder.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jānis Bedeicis" />
+    <meta name="twitter:description" content="Mārketinga Projektu Plānotājs" />
+    <meta name="twitter:image" content="images/placeholder.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/assets/icons/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#000000" />
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: #ffffff;
+        }
+
+        .pdf-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .pdf-page {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            z-index: 10;
+        }
+
+        #error {
+            display: none;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
 </head>
 
-<body style="margin:0">
+<body>
 
-<div id="pdf"></div>
+<div id="loading">
+    Ielādē...
+</div>
+
+<div id="error">
+    Neizdevās ielādēt dokumentu.
+</div>
+
+<main class="pdf-container" id="pdf-container"></main>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs"
+        type="module"></script>
 
 <script type="module">
-import * as pdfjsLib from
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.mjs";
+    const PDF_URL =
+        "https://www.janis-bedeicis.id.lv/BIZNESA_KONTAKTKARTE_JANIS_BEDEICIS.pdf";
 
-const pdf = await pdfjsLib.getDocument("https://www.janis-bedeicis.id.lv/BIZNESA_KONTAKTKARTE_JANIS_BEDEICIS.pdf").promise;
-const container = document.getElementById("pdf");
+    const container = document.getElementById("pdf-container");
+    const loading = document.getElementById("loading");
+    const error = document.getElementById("error");
 
-for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 1.5 });
+    try {
 
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    canvas.style.width = "100%";
-    canvas.style.height = "auto";
+        // Import PDF.js
+        const pdfjsLib =
+            await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs");
 
-    container.appendChild(canvas);
+        // PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.mjs";
 
-    await page.render({
-        canvasContext: canvas.getContext("2d"),
-        viewport
+        // Load PDF
+        const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+
+        // Render every page
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+
+            const page = await pdf.getPage(pageNumber);
+
+            const viewport = page.getViewport({
+                scale: 1
+            });
+
+            // Fit PDF page to screen width
+            const screenWidth =
+                Math.min(window.innerWidth, viewport.width);
+
+            const scale =
+                screenWidth / viewport.width;
+
+            const scaledViewport =
+                page.getViewport({ scale: scale });
+
+            const canvas =
+                document.createElement("canvas");
+
+            canvas.className = "pdf-page";
+
+            const context =
+                canvas.getContext("2d");
+
+            canvas.width =
+                scaledViewport.width;
+
+            canvas.height =
+                scaledViewport.height;
+
+            container.appendChild(canvas);
+
+            await page.render({
+                canvasContext: context,
+                viewport: scaledViewport
+            }).promise;
+        }
+
+        loading.style.display = "none";
+
+    } catch (err) {
+
+        console.error("PDF loading error:", err);
+
+        loading.style.display = "none";
+        error.style.display = "block";
+    }
+
+</script>
+
+</body>
+</html>        viewport
     }).promise;
 }
 </script>
