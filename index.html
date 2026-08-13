@@ -22,17 +22,54 @@
     <meta name="twitter:description" content="Mārketinga Projektu Plānotājs" />
     <meta name="twitter:image" content="images/placeholder.png" />
 
-    <!-- Favicon -->
+    <!-- Standard favicon -->
     <link rel="icon" href="/assets/icons/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png" />
+
+    <!-- PNG icons -->
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/assets/icons/favicon-32x32.png"
+    />
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="16x16"
+        href="/assets/icons/favicon-16x16.png"
+    />
+
+    <!-- Apple Touch Icon -->
+    <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="/assets/icons/apple-touch-icon.png"
+    />
+
+    <!-- Web App Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    <link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#000000" />
+
+    <!-- Safari pinned tab -->
+    <link
+        rel="mask-icon"
+        href="/assets/icons/safari-pinned-tab.svg"
+        color="#000000"
+    />
 
     <!-- Theme color -->
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta
+        name="theme-color"
+        content="#ffffff"
+        media="(prefers-color-scheme: light)"
+    />
+
+    <meta
+        name="theme-color"
+        content="#121212"
+        media="(prefers-color-scheme: dark)"
+    />
+
     <meta name="color-scheme" content="light dark" />
 
     <style>
@@ -41,7 +78,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            min-height: 100%;
         }
 
         body {
@@ -51,18 +88,17 @@
         .pdf-container {
             width: 100%;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0;
+            padding: 0;
             overflow-x: hidden;
-            overflow-y: auto;
         }
 
         .pdf-page {
             display: block;
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            margin: 0 auto;
+            margin: 0;
+            padding: 0;
         }
 
         #loading {
@@ -88,94 +124,108 @@
 
 <body>
 
-<div id="loading">
-    Ielādē...
-</div>
+    <div id="loading">
+        Ielādē...
+    </div>
 
-<div id="error">
-    Neizdevās ielādēt dokumentu.
-</div>
+    <div id="error">
+        Neizdevās ielādēt dokumentu.
+    </div>
 
-<main class="pdf-container" id="pdf-container"></main>
+    <main
+        class="pdf-container"
+        id="pdf-container"
+    ></main>
 
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs"
-        type="module"></script>
+    <!-- PDF.js -->
+    <script type="module">
 
-<script type="module">
+        const PDF_URL =
+            "https://www.janis-bedeicis.id.lv/BIZNESA_KONTAKTKARTE_JANIS_BEDEICIS.pdf";
 
-    const PDF_URL =
-        "https://www.janis-bedeicis.id.lv/BIZNESA_KONTAKTKARTE_JANIS_BEDEICIS.pdf";
+        const container =
+            document.getElementById("pdf-container");
 
-    const container = document.getElementById("pdf-container");
-    const loading = document.getElementById("loading");
-    const error = document.getElementById("error");
+        const loading =
+            document.getElementById("loading");
 
-    try {
+        const error =
+            document.getElementById("error");
 
-        // Import PDF.js
-        const pdfjsLib =
-            await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs");
+        try {
 
-        // PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.mjs";
+            const pdfjsLib =
+                await import(
+                    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.min.mjs"
+                );
 
-        // Load PDF
-        const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.mjs";
 
-        // Render every page
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+            const pdf =
+                await pdfjsLib.getDocument(PDF_URL).promise;
 
-            const page = await pdf.getPage(pageNumber);
+            for (
+                let pageNumber = 1;
+                pageNumber <= pdf.numPages;
+                pageNumber++
+            ) {
 
-            const viewport = page.getViewport({
-                scale: 1
-            });
+                const page =
+                    await pdf.getPage(pageNumber);
 
-            // Fit PDF page to screen width
-            const screenWidth =
-                Math.min(window.innerWidth, viewport.width);
+                const originalViewport =
+                    page.getViewport({
+                        scale: 1
+                    });
 
-            const scale =
-                screenWidth / viewport.width;
+                // Scale PDF to 100% browser width
+                const scale =
+                    window.innerWidth /
+                    originalViewport.width;
 
-            const scaledViewport =
-                page.getViewport({ scale: scale });
+                const viewport =
+                    page.getViewport({
+                        scale: scale
+                    });
 
-            const canvas =
-                document.createElement("canvas");
+                const canvas =
+                    document.createElement("canvas");
 
-            canvas.className = "pdf-page";
+                canvas.className =
+                    "pdf-page";
 
-            const context =
-                canvas.getContext("2d");
+                const context =
+                    canvas.getContext("2d");
 
-            canvas.width =
-                scaledViewport.width;
+                canvas.width =
+                    viewport.width;
 
-            canvas.height =
-                scaledViewport.height;
+                canvas.height =
+                    viewport.height;
 
-            container.appendChild(canvas);
+                container.appendChild(canvas);
 
-            await page.render({
-                canvasContext: context,
-                viewport: scaledViewport
-            }).promise;
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+            }
+
+            loading.style.display = "none";
+
+        } catch (err) {
+
+            console.error(
+                "PDF loading error:",
+                err
+            );
+
+            loading.style.display = "none";
+            error.style.display = "block";
         }
 
-        loading.style.display = "none";
-
-    } catch (err) {
-
-        console.error("PDF loading error:", err);
-
-        loading.style.display = "none";
-        error.style.display = "block";
-    }
-
-</script>
+    </script>
 
 </body>
 </html>
